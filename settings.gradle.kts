@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "wifi_radar"
+rootProject.name = "WiFi_Radar"
 include(":app")
  

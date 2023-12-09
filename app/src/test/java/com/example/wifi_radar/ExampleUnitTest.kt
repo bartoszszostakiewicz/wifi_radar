@@ -1,4 +1,4 @@
-package com.wifi_radar
+package com.example.wifi_radar
 
 import org.junit.Test
 
