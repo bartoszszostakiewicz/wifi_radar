@@ -1,21 +1,19 @@
 package com.wifi_radar.data
 
-import com.wifi_radar.data.entities.WiFiMeasurementEntity
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
+
+@Entity(tableName = "measurements_table")
 data class WiFiMeasurement(
-    val wifiName: String = "",
-    val ssid: String = "",
-    val rssi: Double = 0.00,
-    val linkSpeed: Double = 0.00,
-    val frequency: Double = 0.00,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    var wifiName: String = "",
+    var ssid: String = "",
+    var rssi: Double = 0.00,
+    var linkSpeed: Double = 0.00,
+    var frequency: Double = 0.00,
+    var distance: Int = 0,
+    var measurementDate: Long = 0,
 ){
-    fun toEntity(): WiFiMeasurementEntity{
-        return WiFiMeasurementEntity(
-            wifiName = wifiName,
-            ssid = ssid,
-            rssi = rssi,
-            linkSpeed = linkSpeed,
-            frequency = frequency,
-        )
-    }
+
 }

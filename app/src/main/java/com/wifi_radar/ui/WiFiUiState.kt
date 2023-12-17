@@ -1,9 +1,10 @@
 package com.wifi_radar.ui
 
-import com.wifi_radar.data.entities.WiFiMeasurementEntity
+import com.wifi_radar.data.WiFiMeasurement
+
 
 data class WiFiUiState(
-    val measurements: List<WiFiMeasurementEntity> = emptyList(),
+    val measurements: List<WiFiMeasurement> = emptyList(),
 )
 
 
