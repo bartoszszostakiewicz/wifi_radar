@@ -26,4 +26,5 @@ interface WiFiMeasurementDao {
     @Query("DELETE FROM measurements_table")
     suspend fun dropDatabase()
 
+
 }

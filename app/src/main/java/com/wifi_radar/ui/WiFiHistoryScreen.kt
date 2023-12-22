@@ -43,7 +43,7 @@ fun HistoryScreen(navController: NavController = rememberNavController(), viewMo
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
             if (!historyMeasurements.isNullOrEmpty()) {
-                WifiDetailsScreen(historyMeasurements)
+                WifiDetailsScreen(navController,historyMeasurements)
             }
         }
     }

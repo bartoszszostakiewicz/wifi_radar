@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.wifi_radar"
-        minSdk = 33
-        targetSdk = 33
+        minSdk = 32
+        targetSdk = 32
         versionCode = 1
         versionName = "1.0"
 
@@ -65,6 +65,8 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation("com.google.accompanist:accompanist-navigation-animation:0.23.0")
+    implementation("co.yml:ycharts:2.1.0")
+
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("javax.inject:javax.inject:1")
     testImplementation("junit:junit:4.13.2")

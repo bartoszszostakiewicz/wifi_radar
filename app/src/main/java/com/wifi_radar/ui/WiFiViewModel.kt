@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.concurrent.fixedRateTimer
 
@@ -33,14 +36,44 @@ class WiFiViewModel(
        return repo.getAllMeasurements()
     }
 
+
+    fun getRSSIWiFi(ssid : String, frequency : Double): Flow<List<Double>> {
+        return repo.getAllMeasurements().map { measurements ->
+            measurements.filter { it.ssid == ssid && it.frequency == frequency }.map { it.rssi }
+        }
+    }
+
+
+    fun getRSSIConnectedWifi(): Flow<List<Double>> {
+        return _uiState
+            .map { uiState ->
+
+                uiState.measurements.firstOrNull()?.let { measurement ->
+                    if (measurement.linkSpeed != 0.0) measurement.ssid else ""
+                } ?: ""
+            }
+            .flatMapLatest { connectedSSID ->
+                if (connectedSSID.isNotEmpty()) {
+
+                    repo.getAllMeasurements().map { measurements ->
+                        measurements.filter { it.ssid == connectedSSID }.map { it.rssi }
+                    }
+                } else {
+
+                    flowOf(emptyList())
+                }
+            }
+    }
+
+
     init{
         updateWiFiInfo()
     }
 
 
-    private fun updateWiFiInfo() {
+    private fun updateWiFiInfo(period: Long = 50000) {
 
-       fixedRateTimer("timer", false, 0L, 50000) {
+       fixedRateTimer("timer", false, 0L, period) {
 
 
             _uiState.value = WiFiUiState()
@@ -49,14 +82,15 @@ class WiFiViewModel(
 
 
            val wifiManager = app.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+           //in feauture shall be used ConnectivityManager :)
            val wifiInfo = wifiManager.connectionInfo
 
-           // Check if we are connected to a WiFi network
-           if (wifiInfo != null && wifiInfo.networkId != -1) {
-               val connectedSSID = wifiInfo.ssid.trim('"') // SSID of the connected network
-               val linkSpeed = wifiInfo.linkSpeed // Link speed in Mbps
 
-               // Now you can update your UI or data repository with this information
+           if (wifiInfo != null && wifiInfo.networkId != -1) {
+               val connectedSSID = wifiInfo.ssid.trim('"')
+               val linkSpeed = wifiInfo.linkSpeed
+
                Log.d("WiFiConnection", "Connected to: $connectedSSID with link speed: $linkSpeed Mbps")
                 deviceIsConnected = true
            } else {
@@ -71,25 +105,33 @@ class WiFiViewModel(
                 viewModelScope.launch {
                     val measurements = it.map { scanResult ->
                         WiFiMeasurement(
-                            wifiName = scanResult.wifiSsid.toString(),
-                            ssid = scanResult.wifiSsid.toString(),
+//                            wifiName = scanResult.wifiSsid.toString(),
+                            wifiName = scanResult.SSID.toString(),
+                            ssid = scanResult.SSID.toString(),
                             rssi = scanResult.level.toDouble(),
-                            linkSpeed = if (deviceIsConnected &&
-                                wifiInfo.ssid.toString() == scanResult.wifiSsid.toString() &&
-                                scanResult.frequency.toDouble() == wifiInfo.frequency.toDouble()
-                                ) wifiInfo.linkSpeed.toDouble() else 0.0,
+                            linkSpeed = if (wifiInfo.ssid.toString() == "\""+scanResult.SSID+"\"" &&
+                                scanResult.frequency.toDouble() == wifiInfo.frequency.toDouble()) {
+                                wifiInfo.linkSpeed.toDouble()
+                            } else 0.0,
+
                             frequency = scanResult.frequency.toDouble(),
                             distance = freeSpaceModel(scanResult.level.toDouble(), scanResult.frequency.toDouble()),
                             measurementDate = System.currentTimeMillis(),
                         )
                     }
+                        .sortedWith(compareByDescending { it.linkSpeed })
+
                     repo.insertAll(measurements)
-                    // Update _uiState with new measurements
                     _uiState.value = _uiState.value.copy(measurements = measurements)
                 }
+
             }
         }
     }
+
+
+
+
 
 
 }

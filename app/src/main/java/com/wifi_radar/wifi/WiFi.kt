@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -38,6 +40,7 @@ class WiFi(context: Context) {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun getScanResults(): MutableList<ScanResult>? {
         val results = if (ActivityCompat.checkSelfPermission(
                 this.c,
@@ -47,13 +50,13 @@ class WiFi(context: Context) {
             return null
         } else {
 
-
             wifiManager.scanResults
         }
         for (scanResult in results) {
             Log.d(
                 "WiFiScan4",
-                "SSID: ${scanResult.wifiSsid}, Signal Strength: ${scanResult.level} "
+                "SSID: ${scanResult.SSID}, Signal Strength: ${scanResult.level} "
+
             )
         }
 
